@@ -11,6 +11,7 @@
 *.workspace
 
 # MinGW build folders
+tmp/
 bin/
 build/
 Debug/
