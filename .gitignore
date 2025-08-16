@@ -21,4 +21,5 @@ Release/
 *~
 *.tmp
 *.log
+.vscode
 filenote_uninstall.cmd
