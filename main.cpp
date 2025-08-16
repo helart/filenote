@@ -27,7 +27,7 @@ void CreateRegistryEntry() {
     std::string exePathStr = exePath;
     std::string commandStr = "\"" + exePathStr + "\" \"%1\"";
 
-    // Ключ FileNote
+    // Key FileNote
     if (RegCreateKeyExA(HKEY_CURRENT_USER, keyPath, 0, NULL,
                         REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
         RegSetValueExA(hKey, "MUIVerb", 0, REG_SZ,
@@ -39,7 +39,7 @@ void CreateRegistryEntry() {
         RegCloseKey(hKey);
     }
 
-    // Ключ command
+    // Key command
     if (RegCreateKeyExA(HKEY_CURRENT_USER, cmdPath, 0, NULL,
                         REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
         RegSetValueExA(hKey, NULL, 0, REG_SZ,
@@ -48,7 +48,7 @@ void CreateRegistryEntry() {
         RegCloseKey(hKey);
     }
 
-    // Создаём файл filenote_uninstall.cmd рядом с exe
+    // Create filenote_uninstall.cmd file next to exe
     std::string uninstallCmdPath = exePathStr;
     size_t lastSlash = uninstallCmdPath.find_last_of("\\/");
     if (lastSlash != std::string::npos) {
@@ -61,33 +61,32 @@ void CreateRegistryEntry() {
 }
 
 void RemoveRegistryEntry() {
-    // Удаляем ключи реестра
+    // Delete registry keys
     RegDeleteKeyA(HKEY_CURRENT_USER, "Software\\Classes\\*\\shell\\FileNote\\command");
     RegDeleteKeyA(HKEY_CURRENT_USER, "Software\\Classes\\*\\shell\\FileNote");
 
-    // Определяем путь к исполняемому файлу
+    // Determine the path to the executable file
     char exePath[MAX_PATH];
     GetModuleFileNameA(NULL, exePath, MAX_PATH);
 
-    // Создаём путь к filenote_uninstall.cmd
+    // Create path to filenote_uninstall.cmd
     std::string uninstallCmdPath = exePath;
     size_t lastSlash = uninstallCmdPath.find_last_of("\\/");
     if (lastSlash != std::string::npos) {
         uninstallCmdPath = uninstallCmdPath.substr(0, lastSlash + 1) + "filenote_uninstall.cmd";
     }
 
-    // Проверяем, существует ли файл, и удаляем
+    // Check if the file exists and delete it
     if (GetFileAttributesA(uninstallCmdPath.c_str()) != INVALID_FILE_ATTRIBUTES) {
         DeleteFileA(uninstallCmdPath.c_str());
     }
 
-    MessageBoxA(NULL, "Пункт FileNote удалён из контекстного меню.", "FileNote", MB_OK | MB_ICONINFORMATION);
+    MessageBoxA(NULL, "The FileNote item has been removed from the context menu.", "FileNote", MB_OK | MB_ICONINFORMATION);
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-                   LPSTR lpCmdLine, int nCmdShow) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 
-    // Если запущено с аргументом --uninstall
+    // If run with --uninstall argument
     if (__argc >= 2 && strcmp(__argv[1], "--uninstall") == 0) {
         RemoveRegistryEntry();
         return 0;
@@ -95,16 +94,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     bool registryExists = IsRegistryEntryExists();
 
-    // Если запись в реестре отсутствует, создаём её и .cmd для удаления
+    // If the registry entry is missing, create it and .cmd to delete it
     if (!registryExists) {
         CreateRegistryEntry();
-        MessageBoxA(NULL, "Путь к программе зарегистрирован для контекстного меню.", "FileNote", MB_OK | MB_ICONINFORMATION);
-        return 0; // выходим, не создавая заметку
+        MessageBoxA(NULL, "The path to the program is registered for the context menu.", "FileNote", MB_OK | MB_ICONINFORMATION);
+        return 0; // exit without creating a note
     }
 
-    // Если программа запущена без аргумента и запись уже есть
+    // If the program is launched without an argument and the record already exists
     if (__argc < 2) {
-        MessageBoxA(NULL, "Нет файла для заметки.", "FileNote", MB_OK | MB_ICONERROR);
+        MessageBoxA(NULL, "There is no file for the note.", "FileNote", MB_OK | MB_ICONERROR);
         return 1;
     }
 
@@ -116,11 +115,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     lstrcpyA(notePath, filepath);
 
     PathRemoveExtensionA(notePath);
-    strcat(notePath, ".note.txt"); // стильный вариант заметки
+    strcat(notePath, ".note.txt"); // stylish version of the note
 
     if (GetFileAttributesA(notePath) == INVALID_FILE_ATTRIBUTES) {
         std::ofstream ofs(notePath);
-        ofs << "Заметка для файла: " << PathFindFileNameA(filepath) << "\n";
+        ofs << "Note for file: " << PathFindFileNameA(filepath) << "\n";
     }
 
     ShellExecuteA(NULL, "open", notePath, NULL, NULL, SW_SHOWNORMAL);

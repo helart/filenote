@@ -1,0 +1,22 @@
+# Windows temporary files
+*.exe
+*.o
+*.obj
+*.dll
+*.pdb
+*.ilk
+
+# CodeLite project files
+*.project
+*.workspace
+
+# MinGW build folders
+bin/
+build/
+Debug/
+Release/
+
+# Backup and temp files
+*~
+*.tmp
+*.log
